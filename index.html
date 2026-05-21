@@ -819,7 +819,7 @@ section,div[id]{scroll-margin-top:64px}
           <span class="r-badge year">2026</span>
           <a href="https://ieeexplore.ieee.org/document/11476481" target="_blank" class="r-badge published">Published ↗</a>
         </div>
-        <div class="r-title">Evaluating the Efficacy of Quantum Machine Learning at Detecting Advance-Fee Fraud Attacks</div>
+        <div class="r-title">Cyber Fraud Predictive Model Using Quantum Machine Learning</div>
         <div class="r-authors">Farheen Shaikh, Tapadhir Das</div>
         <div class="r-desc">Comparative Analysis of Quantum Neural Networks against SVM, Logistic Regression, and Neural Network Models for Credit Card Fraud Detection</div>
         <a class="r-pdf-btn" href="Paper1.pdf" target="_blank">PDF ↗</a>
@@ -830,7 +830,7 @@ section,div[id]{scroll-margin-top:64px}
           <span class="r-badge year">2026</span>
           <span class="r-badge published">Publishing</span>
         </div>
-        <div class="r-title">A Hallucination-Resistant RAG System for Software Update Queries</div>
+        <div class="r-title">LLM Hallucination Predictive Model for Release Notes</div>
         <div class="r-authors">Farheen Shaikh, Solomon Berhe</div>
         <div class="r-desc">An Autonomous Agent Architecture for Hallucination-Aware CVE, patch, and version analysis using Retrieval-Augmented Generation</div>
         <a class="r-pdf-btn" href="Paper2.pdf" target="_blank">PDF ↗</a>
@@ -1048,7 +1048,7 @@ function goTo(e){
 function toggle(header){
   var body = header.nextElementSibling;
   // skip divider
-  while(body && !body.classList.contains('section-body')) body = body.nextElementSibling;
+  while(body && !body.classList.contains('section-body')) body = body.nextEleQuantummentSibling;
   if(!body) return;
   var open = body.classList.contains('open');
   body.classList.toggle('open',!open);
@@ -1071,7 +1071,7 @@ window.addEventListener('scroll',function(){
 
 /* ── TYPEWRITER ────────────────────────── */
 (function(){
-  var roles=['Data & Research Engineer', 'Agentic and LLM Architecture Enthusist',];
+  var roles=['Data & Research Engineer', 'Agentic and LLM Architecture Enthusiast',];
   var ri=0,rc=0,del=false;
   function tick(){
     var el=document.getElementById('tw-dynamic');

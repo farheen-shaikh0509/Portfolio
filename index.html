@@ -60,7 +60,8 @@ section,div[id]{scroll-margin-top:64px}
   background:linear-gradient(135deg,#c084fc,#22d3ee);
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;
 }
-.nav-links{display:flex;gap:1.4rem;list-style:none}
+.nav-links{display:flex;gap:1.4rem;list-style:none;padding:0}
+.nav-links li{display:contents}
 .nav-links a{
   font-family:var(--font-mono);font-size:.68rem;letter-spacing:0.1em;
   text-transform:uppercase;color:var(--text2);text-decoration:none;
@@ -557,15 +558,15 @@ section,div[id]{scroll-margin-top:64px}
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
   </button>
   <ul class="nav-links">
-    <a href="#about" onclick="goTo(event)">About</a>
-    <a href="#skills" onclick="goTo(event)">Skills</a>
-    <a href="#projects" onclick="goTo(event)">Projects</a>
-    <a href="#experience" onclick="goTo(event)">Experience</a>
-    <a href="#research" onclick="goTo(event)">Research</a>
-    <a href="#blog" onclick="goTo(event)">Blog</a>
-    <a href="#education" onclick="goTo(event)">Education</a>
-    <a href="#awards" onclick="goTo(event)">Awards</a>
-    <a href="#contact" onclick="goTo(event)">Contact</a>
+    <li><a href="#about" onclick="goTo(event)">About</a></li>
+    <li><a href="#skills" onclick="goTo(event)">Skills</a></li>
+    <li><a href="#projects" onclick="goTo(event)">Projects</a></li>
+    <li><a href="#experience" onclick="goTo(event)">Experience</a></li>
+    <li><a href="#research" onclick="goTo(event)">Research</a></li>
+    <li><a href="#blog" onclick="goTo(event)">Blog</a></li>
+    <li><a href="#education" onclick="goTo(event)">Education</a></li>
+    <li><a href="#awards" onclick="goTo(event)">Awards</a></li>
+    <li><a href="#contact" onclick="goTo(event)">Contact</a></li>
   </ul>
 </nav>
 
@@ -612,7 +613,7 @@ section,div[id]{scroll-margin-top:64px}
   <div class="section-body">
     <br>
     <div class="about-content">
-      <p><strong>An AI Autonomous and ML Research Engineer building expertise in AI-Powered systems evaluation.</strong> Specialize in computational performance evaluation and system optimization — includes model performance, for enhancing foundation model performance and tuned frameworks. I'm enthusiastic about building AI that earns trust — through accuracy, structured evaluation, and sitting close to the humans who judge it. Author of published articles and research papers.</p>
+      <p><strong>A Research Data Engineer building expertise in AI-Powered systems evaluation.</strong> Specialize in computational performance evaluation and system optimization — includes model performance, for enhancing foundation model performance and tuned frameworks. I'm enthusiastic about building AI that earns trust — through accuracy, structured evaluation, and sitting close to the humans who judge it. Author of published articles and research papers.</p>
     </div>
   </div>
 </section>
@@ -684,7 +685,7 @@ section,div[id]{scroll-margin-top:64px}
 <section class="section section-alt" id="projects">
   <div class="section-header" onclick="toggle(this)" aria-expanded="false">
     <span class="section-tag">03</span>
-    <span class="section-title-text"> Applied Research & Projects</span>
+    <span class="section-title-text">Applied Research & Projects</span>
     <span class="section-chevron"><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></span>
   </div>
   <div class="section-divider"></div>
@@ -721,7 +722,7 @@ section,div[id]{scroll-margin-top:64px}
       </div>
       <div class="project-card">
         <div class="project-card-body">
-          <h3>Event Scheduler using with Calender Data & AWS Lambda</h3>
+          <h3>Event Scheduler using Calendar Data & AWS Lambda</h3>
           <div class="project-tags">
             <span class="ptag">Java</span><span class="ptag">AWS Lambda</span><span class="ptag">gRPC APIs</span><span class="ptag">Docker</span>
           </div>
@@ -1047,7 +1048,7 @@ function goTo(e){
 function toggle(header){
   var body = header.nextElementSibling;
   // skip divider
-  while(body && !body.classList.contains('section-body')) body = body.nextEleQuantummentSibling;
+  while(body && !body.classList.contains('section-body')) body = body.nextElementSibling;
   if(!body) return;
   var open = body.classList.contains('open');
   body.classList.toggle('open',!open);

@@ -416,6 +416,9 @@ section,div[id]{scroll-margin-top:64px}
 .timeline-date{font-family:var(--font-mono);font-size:.72rem;color:var(--purple);letter-spacing:0.08em;margin-bottom:3px}
 .timeline-role{font-size:1rem;font-weight:700;color:var(--text);margin-bottom:1px}
 .timeline-company{font-size:.88rem;color:var(--text2)}
+.timeline-skills{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.skill-tag{font-family:var(--font-mono);font-size:.68rem;padding:3px 9px;border-radius:20px;background:rgba(139,92,246,.12);border:1px solid rgba(139,92,246,.35);color:var(--purple);letter-spacing:0.04em;transition:background .2s,color .2s}
+.skill-tag:hover{background:rgba(139,92,246,.28);color:#fff}
 
 /* ── RESEARCH ──────────────────────────────────────────── */
 .research-cards{max-width:900px;margin:0 auto;display:flex;flex-direction:column;gap:1.2rem}
@@ -649,7 +652,7 @@ section,div[id]{scroll-margin-top:64px}
   <div class="section-body">
     <br>
     <div class="about-content">
-      <p>I have experience in <span style="color:var(--purple)">research data engineering</span> with <span style="color:var(--purple)">data-heavy LLM applications</span> and Insights. My focus on <span style="color:var(--purple)">feature engineering</span>, <span style="color:var(--purple)">agentic RAG retrieval</span>, and <span style="color:var(--purple)">inference optimization</span> has enabled me to deliver scalable and accurate dashboards and web applications.</p>
+      <p>A <span style="color:var(--purple)">research data engineer</span> with experience in <span style="color:var(--purple)">data-heavy LLM applications</span> and Insights. My focus on <span style="color:var(--purple)">feature engineering</span>, <span style="color:var(--purple)">agentic RAG retrieval</span>, and <span style="color:var(--purple)">inference optimization</span> has enabled me to deliver scalable and accurate dashboards and web applications.</p>
       <p style="margin-top:1rem;">My ability to bridge <span style="color:var(--purple)">technical depth with clear communication</span> has been a consistent strength — writing application usage guidance, articles for understanding architectural design, and README files for technology usage and its tradeoffs, and <span style="color:var(--purple)">research papers with experimental proofs</span>. I thrive in fast-paced, accountability-driven environments, switching fluidly between <span style="color:var(--purple)">debugging pipelines</span>, <span style="color:var(--purple)">optimizing workflows</span>, presenting research findings, and collaborating with stakeholders — energized with curiosity and inventions.</p>
     </div>
   </div>
@@ -801,58 +804,83 @@ section,div[id]{scroll-margin-top:64px}
     <br>
     <div class="timeline">
 
-      <!-- ── Phase III: Research & Development ── -->
-      <div class="timeline-phase">Phase III — Research &amp; Development</div>
-
       <div class="timeline-item">
         <div class="timeline-dot"></div>
         <div class="timeline-date">January 2026 – April 2026</div>
         <div class="timeline-role">Research Assistant — Generative AI &amp; Release Note System</div>
         <div class="timeline-company">University of the Pacific</div>
-        <div class="timeline-desc">Designed and evaluated an autonomous agent architecture for hallucination-aware CVE and patch analysis using RAG. Published research on LLM abstention and predictive hallucination modeling for release note data.</div>
+        <div class="timeline-skills">
+          <span class="skill-tag">PyTorch</span>
+          <span class="skill-tag">SQL</span>
+          <span class="skill-tag">Python</span>
+          <span class="skill-tag">Apache Kafka</span>
+          <span class="skill-tag">Apache Airflow</span>
+          <span class="skill-tag">LangChain</span>
+          <span class="skill-tag">Pandas</span>
+        </div>
       </div>
-
-      <!-- ── Phase II: Data & ML Expertise ── -->
-      <div class="timeline-phase">Phase II — Data &amp; ML Expertise</div>
 
       <div class="timeline-item">
         <div class="timeline-dot"></div>
         <div class="timeline-date">August 2025 – December 2025</div>
         <div class="timeline-role">Machine Learning Expert</div>
         <div class="timeline-company">Handshake AI</div>
-        <div class="timeline-desc">Built and optimized LLM inference pipelines using TensorRT-LLM and Triton Inference Server. Implemented RAGAS-based evaluation frameworks and RLAIF fine-tuning workflows for production-grade AI systems.</div>
+        <div class="timeline-skills">
+          <span class="skill-tag">PyTorch</span>
+          <span class="skill-tag">NLP</span>
+          <span class="skill-tag">Prompt Engineering</span>
+          <span class="skill-tag">Performance Tuning</span>
+        </div>
       </div>
       <div class="timeline-item">
         <div class="timeline-dot"></div>
         <div class="timeline-date">June 2025 – August 2025</div>
         <div class="timeline-role">Digital Project Assistant Developer</div>
         <div class="timeline-company">University of the Pacific</div>
-        <div class="timeline-desc">Developed data pipelines and analytics dashboards for institutional research initiatives. Integrated Microsoft Graph APIs and Grafana for real-time diversity and inclusion metrics across study abroad programs.</div>
+        <div class="timeline-skills">
+          <span class="skill-tag">GitHub</span>
+          <span class="skill-tag">JavaScript</span>
+          <span class="skill-tag">SQL</span>
+          <span class="skill-tag">Tableau</span>
+          <span class="skill-tag">MongoDB</span>
+        </div>
       </div>
-
-      <!-- ── Phase I: Distributed Systems & Software Engineering ── -->
-      <div class="timeline-phase">Phase I — Distributed Systems &amp; Software Engineering</div>
 
       <div class="timeline-item">
         <div class="timeline-dot"></div>
         <div class="timeline-date">May 2022 – May 2024</div>
         <div class="timeline-role">Software Developer</div>
         <div class="timeline-company">Empronc Solutions Private Limited</div>
-        <div class="timeline-desc">Engineered microservices and distributed backend systems handling high-volume transactional data. Gained deep experience in Kafka-based event streaming, Docker/Kubernetes orchestration, and cloud-native architecture on AWS and Azure.</div>
+        <div class="timeline-skills">
+          <span class="skill-tag">JSON</span>
+          <span class="skill-tag">MySQL</span>
+          <span class="skill-tag">ASP.NET Web API</span>
+          <span class="skill-tag">API Testing</span>
+          <span class="skill-tag">SOAP</span>
+          <span class="skill-tag">Big Data</span>
+        </div>
       </div>
       <div class="timeline-item">
         <div class="timeline-dot"></div>
         <div class="timeline-date">February 2022 – May 2022</div>
         <div class="timeline-role">Support Engineer</div>
         <div class="timeline-company">Allwave AV Solutions</div>
-        <div class="timeline-desc">Diagnosed and resolved system integration issues across distributed AV infrastructure. Built foundational knowledge of networked systems, real-time data flow, and cross-platform debugging.</div>
+        <div class="timeline-skills">
+          <span class="skill-tag">ASP.NET</span>
+          <span class="skill-tag">Jira Service Desk</span>
+        </div>
       </div>
       <div class="timeline-item">
         <div class="timeline-dot"></div>
         <div class="timeline-date">September 2021 – February 2022</div>
         <div class="timeline-role">Coding Instructor</div>
         <div class="timeline-company">iCode School</div>
-        <div class="timeline-desc">Introduced students to programming fundamentals and computational thinking. Sparked the early interest in systems design and applied problem-solving that shaped the path forward.</div>
+        <div class="timeline-skills">
+          <span class="skill-tag">Python</span>
+          <span class="skill-tag">Curriculum Design</span>
+          <span class="skill-tag">Teaching</span>
+          <span class="skill-tag">Computer Science</span>
+        </div>
       </div>
 
     </div>
@@ -1063,12 +1091,6 @@ section,div[id]{scroll-margin-top:64px}
         </a>
         <a class="social-icon" href="mailto:farheen.s.shaikh05@gmail.com" title="Email">
           <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
-        </a>
-        <a class="social-icon" href="https://leetcode.com/u/fshaikh1/" target="_blank" title="LeetCode">
-          <svg viewBox="0 0 24 24"><path d="M13.483 0a1.374 1.374 0 00-.961.438L7.116 6.226l-3.854 4.126a5.266 5.266 0 00-1.209 2.104 5.35 5.35 0 00-.125.513 5.527 5.527 0 00.062 2.362 5.83 5.83 0 00.349 1.017 5.938 5.938 0 001.271 1.818l4.277 4.193.039.038c2.248 2.165 5.852 2.133 8.063-.074l2.396-2.392c.54-.54.54-1.414.003-1.955a1.378 1.378 0 00-1.951-.003l-2.396 2.392a3.021 3.021 0 01-4.205.038l-.02-.019-4.276-4.193c-.652-.64-.972-1.469-.948-2.263a2.68 2.68 0 01.066-.523 2.545 2.545 0 01.619-1.164L9.13 8.114c1.058-1.134 3.204-1.27 4.43-.278l3.501 2.831c.593.48 1.461.387 1.94-.207a1.384 1.384 0 00-.207-1.943l-3.5-2.831c-.8-.647-1.766-1.045-2.774-1.202l2.015-2.158A1.384 1.384 0 0013.483 0zm-2.866 12.815a1.38 1.38 0 00-1.38 1.382 1.38 1.38 0 001.38 1.382H20.79a1.38 1.38 0 001.38-1.382 1.38 1.38 0 00-1.38-1.382z"/></svg>
-        </a>
-        <a class="social-icon" href="https://x.com/FarheenSS05" target="_blank" title="X">
-          <svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
         </a>
         <a class="social-icon" href="https://www.linkedin.com/in/farheen-shaikh0509/" target="_blank" title="LinkedIn">
           <svg viewBox="0 0 24 24">

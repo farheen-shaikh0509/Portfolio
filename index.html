@@ -316,6 +316,41 @@ section,div[id]{scroll-margin-top:64px}
 }
 .about-content strong{color:var(--text);font-weight:600}
 
+/* ── ABOUT JOURNEY ARC ─────────────────────────────────── */
+.about-journey{
+  display:flex;align-items:stretch;gap:0;
+  margin:2rem 0 1.8rem;
+  border:1px solid var(--card-border);border-radius:8px;overflow:hidden;
+}
+.journey-phase{
+  flex:1;padding:1rem 1.2rem;position:relative;
+  background:var(--card-bg);border-right:1px solid var(--card-border);
+  transition:background .3s;
+}
+.journey-phase:last-child{border-right:none}
+.journey-phase:hover{background:rgba(168,85,247,0.06)}
+.journey-arrow{
+  position:absolute;right:-1px;top:50%;transform:translateY(-50%);
+  width:0;height:0;
+  border-top:10px solid transparent;
+  border-bottom:10px solid transparent;
+  border-left:10px solid var(--card-border);
+  z-index:2;
+}
+.journey-phase:last-child .journey-arrow{display:none}
+.journey-num{
+  font-family:var(--font-mono);font-size:.58rem;letter-spacing:0.14em;
+  color:var(--text3);text-transform:uppercase;margin-bottom:.35rem;
+}
+.journey-label{
+  font-family:var(--font-display);font-size:.72rem;font-weight:700;
+  letter-spacing:0.06em;text-transform:uppercase;margin-bottom:.3rem;
+}
+.journey-phase:nth-child(1) .journey-label{color:var(--gh-green)}
+.journey-phase:nth-child(3) .journey-label{color:var(--cyan)}
+.journey-phase:nth-child(5) .journey-label{color:var(--purple)}
+.journey-sub{font-size:.78rem;color:var(--text3);line-height:1.4}
+
 /* ── SKILLS ────────────────────────────────────────────── */
 .skills-grid{
   display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
@@ -613,13 +648,33 @@ section,div[id]{scroll-margin-top:64px}
   <div class="section-body">
     <br>
     <div class="about-content">
-      <p><strong>
-I have experience in the research and development cycle of data-heavy LLM applications and Insights. My focus on feature engineering, agentic RAGs retrieval, and inference optimization has enabled me to deliver scalable and accurate dashboards and web applications.
 
+      <!-- Career Journey Arc -->
+      <div class="about-journey">
+        <div class="journey-phase">
+          <div class="journey-num">Phase I</div>
+          <div class="journey-label">Distributed Systems</div>
+          <div class="journey-sub">Software Developer building backend services, event-driven architecture &amp; cloud infrastructure</div>
+          <div class="journey-arrow"></div>
+        </div>
+        <div class="journey-phase">
+          <div class="journey-num">Phase II</div>
+          <div class="journey-label">Data &amp; ML Expertise</div>
+          <div class="journey-sub">MS Computer Science — LLM inference, ML pipelines, agentic RAG &amp; evaluation frameworks</div>
+          <div class="journey-arrow"></div>
+        </div>
+        <div class="journey-phase">
+          <div class="journey-num">Phase III</div>
+          <div class="journey-label">Research &amp; Development</div>
+          <div class="journey-sub">Published researcher — hallucination modeling, quantum ML &amp; autonomous agent systems</div>
+        </div>
+      </div>
 
+      <p>A <strong>Research Data Engineer</strong> graduated from the <a href="https://www.pacific.edu/" target="_blank" style="color:var(--cyan);text-decoration:none;">University of the Pacific</a>, building data-heavy distributed LLM applications and insights. The path here was deliberate — starting with distributed systems and software engineering, deepening into data and machine learning through graduate research, and arriving at the intersection of <strong>applied AI and rigorous R&amp;D</strong>.</p>
 
-My ability to bridge technical depth with clear communication has been a consistent strength — writing application usage guidance, articles for understanding architectural design, and README files for technology usage and its tradeoffs, and research papers with experimental proofs. I thrive in fast-paced, accountability-driven environments, switching fluidly between debugging pipelines, optimizing workflows, presenting research findings, and collaborating with stakeholders — energized with curiosity and inventions.       
-      </p>
+      <p style="margin-top:1rem;">My focus spans the full cycle: <strong>feature engineering, agentic RAG retrieval, and LLM inference optimization</strong> — delivering scalable pipelines, accurate evaluations, and production-ready systems. I bridge technical depth with clear communication, writing research papers with experimental proofs, architectural design articles, and application documentation that translates complex tradeoffs into actionable guidance.</p>
+
+      <p style="margin-top:1rem;">I thrive in fast-paced, accountability-driven environments — switching fluidly between debugging pipelines, optimizing inference workflows, presenting research findings, and collaborating with stakeholders — energized by curiosity and a drive to build things that matter.</p>
     </div>
   </div>
 </section>
@@ -691,7 +746,7 @@ My ability to bridge technical depth with clear communication has been a consist
 <section class="section section-alt" id="projects">
   <div class="section-header" onclick="toggle(this)" aria-expanded="false">
     <span class="section-tag">03</span>
-    <span class="section-title-text">Applied Research & Projects</span>
+    <span class="section-title-text">Projects</span>
     <span class="section-chevron"><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></span>
   </div>
   <div class="section-divider"></div>
@@ -769,42 +824,61 @@ My ability to bridge technical depth with clear communication has been a consist
   <div class="section-body">
     <br>
     <div class="timeline">
+
+      <!-- ── Phase III: Research & Development ── -->
+      <div class="timeline-phase">Phase III — Research &amp; Development</div>
+
       <div class="timeline-item">
         <div class="timeline-dot"></div>
         <div class="timeline-date">January 2026 – April 2026</div>
-        <div class="timeline-role">Research Assistant — Generative AI Release Note System</div>
+        <div class="timeline-role">Research Assistant — Generative AI &amp; Release Note System</div>
         <div class="timeline-company">University of the Pacific</div>
+        <div class="timeline-desc">Designed and evaluated an autonomous agent architecture for hallucination-aware CVE and patch analysis using RAG. Published research on LLM abstention and predictive hallucination modeling for release note data.</div>
       </div>
+
+      <!-- ── Phase II: Data & ML Expertise ── -->
+      <div class="timeline-phase">Phase II — Data &amp; ML Expertise</div>
+
       <div class="timeline-item">
         <div class="timeline-dot"></div>
         <div class="timeline-date">August 2025 – December 2025</div>
         <div class="timeline-role">Machine Learning Expert</div>
         <div class="timeline-company">Handshake AI</div>
+        <div class="timeline-desc">Built and optimized LLM inference pipelines using TensorRT-LLM and Triton Inference Server. Implemented RAGAS-based evaluation frameworks and RLAIF fine-tuning workflows for production-grade AI systems.</div>
       </div>
       <div class="timeline-item">
         <div class="timeline-dot"></div>
         <div class="timeline-date">June 2025 – August 2025</div>
         <div class="timeline-role">Digital Project Assistant Developer</div>
         <div class="timeline-company">University of the Pacific</div>
+        <div class="timeline-desc">Developed data pipelines and analytics dashboards for institutional research initiatives. Integrated Microsoft Graph APIs and Grafana for real-time diversity and inclusion metrics across study abroad programs.</div>
       </div>
+
+      <!-- ── Phase I: Distributed Systems & Software Engineering ── -->
+      <div class="timeline-phase">Phase I — Distributed Systems &amp; Software Engineering</div>
+
       <div class="timeline-item">
         <div class="timeline-dot"></div>
         <div class="timeline-date">May 2022 – May 2024</div>
         <div class="timeline-role">Software Developer</div>
         <div class="timeline-company">Empronc Solutions Private Limited</div>
+        <div class="timeline-desc">Engineered microservices and distributed backend systems handling high-volume transactional data. Gained deep experience in Kafka-based event streaming, Docker/Kubernetes orchestration, and cloud-native architecture on AWS and Azure.</div>
       </div>
       <div class="timeline-item">
         <div class="timeline-dot"></div>
         <div class="timeline-date">February 2022 – May 2022</div>
         <div class="timeline-role">Support Engineer</div>
         <div class="timeline-company">Allwave AV Solutions</div>
+        <div class="timeline-desc">Diagnosed and resolved system integration issues across distributed AV infrastructure. Built foundational knowledge of networked systems, real-time data flow, and cross-platform debugging.</div>
       </div>
       <div class="timeline-item">
         <div class="timeline-dot"></div>
         <div class="timeline-date">September 2021 – February 2022</div>
         <div class="timeline-role">Coding Instructor</div>
         <div class="timeline-company">iCode School</div>
+        <div class="timeline-desc">Introduced students to programming fundamentals and computational thinking. Sparked the early interest in systems design and applied problem-solving that shaped the path forward.</div>
       </div>
+
     </div>
   </div>
 </section>

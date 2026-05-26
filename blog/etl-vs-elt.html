@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ETL vs ELT: What's the Difference and Which Should You Use?</title>
+<meta name="description" content="A clear, visual guide to understanding ETL and ELT pipelines — what they are, how they differ, and when to use each in modern data engineering.">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,700;1,9..144,300;1,9..144,400&family=DM+Mono:wght@300;400;500&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0c0f0a;
+  --surface: #141710;
+  --border: #252820;
+  --text: #e8e4d9;
+  --muted: #6b6a62;
+  --accent: #c8f060;
+  --accent2: #f06040;
+  --accent3: #4090f0;
+  --etl-col: #4090f0;
+  --elt-col: #f06040;
+  --card-bg: #181b14;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 17px;
+  line-height: 1.7;
+  overflow-x: hidden;
+}
+
+/* ── GRAIN OVERLAY ── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 999;
+  opacity: 0.6;
+}
+
+/* ── NAV ── */
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 40px;
+  height: 56px;
+  background: rgba(12,15,10,0.85);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+}
+
+.nav-logo {
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.nav-links {
+  display: flex;
+  gap: 32px;
+  list-style: none;
+}
+
+.nav-links a {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.nav-links a:hover { color: var(--text); }
+
+/* ── HERO ── */
+.hero {
+  padding: 140px 40px 80px;
+  max-width: 860px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.hero-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 32px;
+}
+
+.pill {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 5px 12px;
+  border-radius: 2px;
+}
+
+.pill-green { background: rgba(200,240,96,0.12); color: var(--accent); border: 1px solid rgba(200,240,96,0.25); }
+.pill-dim { background: rgba(255,255,255,0.04); color: var(--muted); border: 1px solid var(--border); }
+
+.hero h1 {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: clamp(2.4rem, 6vw, 4rem);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  margin-bottom: 24px;
+  color: var(--text);
+}
+
+.hero h1 em {
+  font-style: italic;
+  font-weight: 300;
+  color: var(--accent);
+}
+
+.hero-lead {
+  font-size: 1.15rem;
+  color: #a8a49a;
+  max-width: 580px;
+  line-height: 1.65;
+  margin-bottom: 40px;
+}
+
+.hero-meta {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.hero-meta span {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 0.06em;
+}
+
+/* ── DIVIDER ── */
+.divider {
+  height: 1px;
+  background: var(--border);
+  max-width: 860px;
+  margin: 0 auto;
+}
+
+/* ── ARTICLE BODY ── */
+article {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 0 40px 100px;
+}
+
+/* ── SECTION ── */
+.section {
+  padding: 72px 0 0;
+}
+
+.section-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.section-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+  max-width: 60px;
+}
+
+h2 {
+  font-family: 'Fraunces', serif;
+  font-size: clamp(1.6rem, 3.5vw, 2.2rem);
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: 20px;
+  color: var(--text);
+}
+
+h3 {
+  font-family: 'Fraunces', serif;
+  font-size: 1.25rem;
+  font-weight: 300;
+  font-style: italic;
+  color: var(--accent);
+  margin: 40px 0 12px;
+}
+
+p {
+  color: #b0aca3;
+  margin-bottom: 20px;
+  max-width: 640px;
+}
+
+strong { color: var(--text); font-weight: 600; }
+
+/* ── PIPELINE VISUAL ── */
+.pipeline-wrap {
+  margin: 40px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.pipeline-row {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  border: 1px solid var(--border);
+  background: var(--card-bg);
+  overflow: hidden;
+  position: relative;
+}
+
+.pipeline-label-col {
+  width: 60px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  border-right: 1px solid var(--border);
+  padding: 20px 0;
+}
+
+.pipeline-label-col.etl { color: var(--etl-col); background: rgba(64,144,240,0.04); }
+.pipeline-label-col.elt { color: var(--elt-col); background: rgba(240,96,64,0.04); }
+
+.pipeline-steps {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  padding: 16px 24px;
+  gap: 0;
+  flex-wrap: wrap;
+}
+
+.step-box {
+  padding: 10px 20px;
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  border: 1px solid;
+  white-space: nowrap;
+}
+
+.step-box.extract { border-color: rgba(64,144,240,0.4); color: var(--etl-col); background: rgba(64,144,240,0.06); }
+.step-box.transform { border-color: rgba(200,240,96,0.4); color: var(--accent); background: rgba(200,240,96,0.06); }
+.step-box.load { border-color: rgba(240,96,64,0.4); color: var(--elt-col); background: rgba(240,96,64,0.06); }
+
+.arrow {
+  color: var(--muted);
+  font-size: 16px;
+  padding: 0 10px;
+  font-family: monospace;
+}
+
+.pipeline-note {
+  margin-left: auto;
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  padding: 4px 12px;
+  border: 1px solid var(--border);
+  white-space: nowrap;
+  align-self: center;
+}
+
+/* ── CALLOUT ── */
+.callout {
+  border-left: 2px solid var(--accent);
+  padding: 20px 24px;
+  background: rgba(200,240,96,0.04);
+  margin: 32px 0;
+  max-width: 640px;
+}
+
+.callout p {
+  margin: 0;
+  color: #c8c4ba;
+  font-style: italic;
+}
+
+/* ── SOURCE LIST ── */
+.source-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  margin: 24px 0 32px;
+}
+
+.source-item {
+  background: var(--card-bg);
+  padding: 16px 18px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.source-num {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--accent);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.source-item p {
+  font-size: 0.9rem;
+  margin: 0;
+  color: #a0a098;
+  line-height: 1.4;
+}
+
+/* ── TAGS ── */
+.tag-cloud {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 20px 0 32px;
+}
+
+.tag-item {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  padding: 6px 14px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  color: var(--text);
+  letter-spacing: 0.05em;
+}
+
+/* ── COMPARISON TABLE ── */
+.compare-wrap {
+  margin: 32px 0;
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 500px;
+}
+
+thead th {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 14px 20px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  font-weight: 500;
+  background: var(--card-bg);
+}
+
+thead th:nth-child(2) { color: var(--etl-col); }
+thead th:nth-child(3) { color: var(--elt-col); }
+
+tbody td {
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+  font-size: 0.9rem;
+  line-height: 1.55;
+  color: #a8a49a;
+}
+
+tbody td:first-child {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  white-space: nowrap;
+  background: var(--card-bg);
+  border-right: 1px solid var(--border);
+}
+
+tbody tr:hover td { background: rgba(255,255,255,0.02); }
+tbody tr:hover td:first-child { background: var(--card-bg); }
+
+/* ── WHEN TO USE ── */
+.when-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  margin: 32px 0;
+}
+
+.when-col {
+  background: var(--card-bg);
+  padding: 28px;
+}
+
+.when-header {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-weight: 500;
+  margin-bottom: 20px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.when-header.etl { color: var(--etl-col); }
+.when-header.elt { color: var(--elt-col); }
+
+.when-col ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.when-col li {
+  font-size: 0.9rem;
+  color: #a0a098;
+  line-height: 1.5;
+  padding-left: 16px;
+  position: relative;
+}
+
+.when-col li::before {
+  content: '—';
+  position: absolute;
+  left: 0;
+  color: var(--muted);
+}
+
+/* ── CONCEPT CARDS ── */
+.concept-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  margin: 32px 0;
+}
+
+.concept-card {
+  background: var(--card-bg);
+  padding: 24px;
+  transition: background 0.2s;
+}
+
+.concept-card:hover { background: rgba(255,255,255,0.03); }
+
+.concept-icon {
+  font-size: 1.6rem;
+  margin-bottom: 12px;
+  display: block;
+}
+
+.concept-card h4 {
+  font-family: 'Fraunces', serif;
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: var(--text);
+}
+
+.concept-card p {
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* ── TL;DR BOX ── */
+.tldr {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-top: 2px solid var(--accent);
+  padding: 32px 36px;
+  margin: 56px 0 0;
+}
+
+.tldr-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 16px;
+}
+
+.tldr ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.tldr li {
+  font-size: 0.95rem;
+  color: #b0aca3;
+  padding-left: 20px;
+  position: relative;
+  line-height: 1.5;
+}
+
+.tldr li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: var(--accent);
+  font-size: 12px;
+}
+
+/* ── AUTHOR ── */
+.author-bar {
+  margin-top: 64px;
+  padding-top: 32px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.author-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--accent3));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Fraunces', serif;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--bg);
+  flex-shrink: 0;
+}
+
+.author-info h5 {
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 2px;
+}
+
+.author-info p {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+  margin: 0;
+  letter-spacing: 0.06em;
+}
+
+/* ── FOOTER ── */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 32px 40px;
+  max-width: 860px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+footer span {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+footer a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.hero { animation: fadeUp 0.6s ease both; }
+.section { animation: fadeUp 0.5s ease both; }
+.section:nth-child(1) { animation-delay: 0.1s; }
+.section:nth-child(2) { animation-delay: 0.15s; }
+.section:nth-child(3) { animation-delay: 0.2s; }
+.section:nth-child(4) { animation-delay: 0.25s; }
+.section:nth-child(5) { animation-delay: 0.3s; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 640px) {
+  nav { padding: 0 20px; }
+  .nav-links { display: none; }
+  .hero, article { padding-left: 20px; padding-right: 20px; }
+  .when-grid { grid-template-columns: 1fr; }
+  .pipeline-note { display: none; }
+  footer { padding: 24px 20px; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="https://farheen-shaikh530.github.io/Portfolio">← Farheen Shaikh</a>
+  <ul class="nav-links">
+    <li><a href="https://farheen-shaikh530.github.io/Portfolio/#blog">Blog</a></li>
+    <li><a href="https://farheen-shaikh530.github.io/Portfolio/#projects">Projects</a></li>
+    <li><a href="https://farheen-shaikh530.github.io/Portfolio/#contact">Contact</a></li>
+  </ul>
+</nav>
+
+<div class="hero">
+  <div class="hero-eyebrow">
+    <span class="pill pill-green">Data Engineering</span>
+    <span class="pill pill-dim">8 min read</span>
+    <span class="pill pill-dim">May 2026</span>
+  </div>
+  <h1>ETL vs ELT — <em>What's the difference</em> and which should you use?</h1>
+  <p class="hero-lead">Two acronyms, three shared steps, and one crucial difference in order. Here's everything you need to know about how modern data pipelines move and transform your data.</p>
+  <div class="hero-meta">
+    <span>By Farheen Shaikh</span>
+    <span>·</span>
+    <span>Data Engineering Series</span>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<article>
+
+  <!-- SECTION 1 -->
+  <div class="section">
+    <div class="section-label">01 — The Basics</div>
+    <h2>What are ETL and ELT?</h2>
+    <p>If you work with data, you've almost certainly encountered these terms. <strong>ETL</strong> stands for Extract, Transform, Load. <strong>ELT</strong> stands for Extract, Load, Transform. Both describe a pipeline that moves raw data from source systems into a destination where it can be analysed — but the order of operations is different, and that difference has major consequences for performance, flexibility, and cost.</p>
+    <p>Think of it this way: you're moving house. In ETL, you pack and sort all your boxes <em>before</em> putting them in the truck. In ELT, you throw everything in the truck first, drive to the new house, and sort it out there. Same stuff, very different workflow.</p>
+
+    <div class="pipeline-wrap">
+      <div class="pipeline-row">
+        <div class="pipeline-label-col etl">ETL</div>
+        <div class="pipeline-steps">
+          <div class="step-box extract">Extract</div>
+          <span class="arrow">→</span>
+          <div class="step-box transform">Transform</div>
+          <span class="arrow">→</span>
+          <div class="step-box load">Load</div>
+          <div class="pipeline-note">Transform before loading</div>
+        </div>
+      </div>
+      <div class="pipeline-row">
+        <div class="pipeline-label-col elt">ELT</div>
+        <div class="pipeline-steps">
+          <div class="step-box extract">Extract</div>
+          <span class="arrow">→</span>
+          <div class="step-box load">Load</div>
+          <span class="arrow">→</span>
+          <div class="step-box transform">Transform</div>
+          <div class="pipeline-note">Transform inside the warehouse</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout">
+      <p>Both ETL and ELT share the same three operations. The only difference is <strong>when</strong> and <strong>where</strong> the transformation happens.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 2 -->
+  <div class="section">
+    <div class="section-label">02 — Breaking It Down</div>
+    <h2>The three stages explained</h2>
+
+    <h3>Extract — Getting the raw data</h3>
+    <p>Extraction is the first step in both pipelines. You're pulling raw data from wherever it lives. This could be a single database or dozens of different systems running simultaneously. The key thing to understand is that at this stage, <strong>no cleaning or transformation happens</strong> — you're just collecting.</p>
+
+    <div class="source-grid">
+      <div class="source-item"><span class="source-num">01</span><p>Relational & NoSQL databases</p></div>
+      <div class="source-item"><span class="source-num">02</span><p>Flat files — CSV, JSON, XML, Parquet</p></div>
+      <div class="source-item"><span class="source-num">03</span><p>SaaS apps — Salesforce, HubSpot, Stripe</p></div>
+      <div class="source-item"><span class="source-num">04</span><p>IoT sensors & device streams</p></div>
+      <div class="source-item"><span class="source-num">05</span><p>Application event logs & click streams</p></div>
+      <div class="source-item"><span class="source-num">06</span><p>APIs & third-party integrations</p></div>
+      <div class="source-item"><span class="source-num">07</span><p>Message queues — Kafka, RabbitMQ, Kinesis</p></div>
+      <div class="source-item"><span class="source-num">08</span><p>Cloud storage — S3, Azure Blob, GCS</p></div>
+    </div>
+
+    <p>One important advantage here: you can extract <strong>structured, semi-structured, and unstructured data</strong> at this stage — all formats are accepted before any processing begins.</p>
+
+    <h3>Transform — Reshaping the data</h3>
+    <p>This is where ETL and ELT diverge — not in <em>what</em> transformation does, but in <em>when and where</em> it runs. Transformation converts raw data into a format that suits the target system and the questions you want to ask of it.</p>
+
+    <p>Common transformation operations include:</p>
+    <div class="tag-cloud">
+      <span class="tag-item">Changing data types</span>
+      <span class="tag-item">Reformatting dates & values</span>
+      <span class="tag-item">Removing duplicates</span>
+      <span class="tag-item">Fixing inconsistent records</span>
+      <span class="tag-item">Aggregating rows</span>
+      <span class="tag-item">Joining multiple tables</span>
+      <span class="tag-item">Encoding & normalisation</span>
+      <span class="tag-item">Filtering irrelevant data</span>
+    </div>
+
+    <p>In <strong>ETL</strong>, this happens on a separate processing server <em>before</em> the data reaches the warehouse. In <strong>ELT</strong>, the raw data lands in the warehouse first, and transformation runs there using the warehouse's own compute power.</p>
+
+    <h3>Load — Storing the data</h3>
+    <p>Loading writes data into the target system — typically a data warehouse or database — where analysts, BI tools, and ML models can access it. In ETL, what arrives is already clean and structured. In ELT, what arrives is raw, and the warehouse handles the rest.</p>
+  </div>
+
+  <!-- SECTION 3 -->
+  <div class="section">
+    <div class="section-label">03 — Side by Side</div>
+    <h2>Key differences at a glance</h2>
+
+    <div class="compare-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Dimension</th>
+            <th>ETL</th>
+            <th>ELT</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Transform happens</td>
+            <td>Before loading, on a separate server</td>
+            <td>After loading, inside the data warehouse</td>
+          </tr>
+          <tr>
+            <td>Data types supported</td>
+            <td>Best suited to structured data</td>
+            <td>Structured, semi-structured, and unstructured</td>
+          </tr>
+          <tr>
+            <td>Speed</td>
+            <td>Slower — external transformation adds overhead</td>
+            <td>Faster — leverages warehouse compute resources</td>
+          </tr>
+          <tr>
+            <td>Raw data preserved?</td>
+            <td>No — only transformed data is stored</td>
+            <td>Yes — raw data stays in the warehouse</td>
+          </tr>
+          <tr>
+            <td>Flexibility</td>
+            <td>Less flexible — schema defined upfront</td>
+            <td>More flexible — re-transform raw data anytime</td>
+          </tr>
+          <tr>
+            <td>Best for</td>
+            <td>Legacy systems, compliance-heavy workloads</td>
+            <td>Modern cloud analytics, diverse data sources</td>
+          </tr>
+          <tr>
+            <td>Typical tools</td>
+            <td>Informatica, Talend, SSIS</td>
+            <td>dbt, Fivetran, Airbyte + Snowflake/BigQuery</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SECTION 4 -->
+  <div class="section">
+    <div class="section-label">04 — Making the Choice</div>
+    <h2>Which one should you use?</h2>
+    <p>ELT has become the default for most modern data teams, largely because cloud warehouses like Snowflake, BigQuery, and Redshift have made in-warehouse transformation fast and cheap. But ETL still has a clear place in the right context.</p>
+
+    <div class="when-grid">
+      <div class="when-col">
+        <div class="when-header etl">◆ Choose ETL when</div>
+        <ul>
+          <li>You're working with legacy databases that have rigid, predetermined schemas</li>
+          <li>Compliance or security rules require data to be cleaned before it's stored anywhere</li>
+          <li>Your target system has limited compute resources</li>
+          <li>You need to load data once and the transformation logic is stable</li>
+          <li>You're feeding data into older BI tools that expect structured input</li>
+        </ul>
+      </div>
+      <div class="when-col">
+        <div class="when-header elt">◆ Choose ELT when</div>
+        <ul>
+          <li>You're using a modern cloud data warehouse (Snowflake, BigQuery, Redshift)</li>
+          <li>Your data sources are diverse — mixing structured logs with JSON events or sensor streams</li>
+          <li>You want to preserve raw data so you can re-transform it as requirements change</li>
+          <li>Speed and pipeline throughput matter</li>
+          <li>Your team does active experimentation and ad-hoc analytics</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="callout">
+      <p>A practical rule of thumb: if you're starting a new data project today on a cloud platform, default to ELT. If you're extending or maintaining a legacy system, ETL is often the safer path.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 5 -->
+  <div class="section">
+    <div class="section-label">05 — The Ecosystem</div>
+    <h2>Key concepts to know alongside ETL/ELT</h2>
+
+    <div class="concept-grid">
+      <div class="concept-card">
+        <span class="concept-icon">🏛️</span>
+        <h4>Data Warehouse</h4>
+        <p>The target system for structured, analytics-ready data. Powers dashboards, reports, and BI tools.</p>
+      </div>
+      <div class="concept-card">
+        <span class="concept-icon">🌊</span>
+        <h4>Data Lake</h4>
+        <p>Stores raw data in any format. Often the landing zone in an ELT flow before transformation begins.</p>
+      </div>
+      <div class="concept-card">
+        <span class="concept-icon">⚡</span>
+        <h4>MPP Database</h4>
+        <p>Massively Parallel Processing. The architecture that makes large-scale ELT transformation fast and affordable.</p>
+      </div>
+      <div class="concept-card">
+        <span class="concept-icon">🔄</span>
+        <h4>Staging Tables</h4>
+        <p>Temporary holding tables inside the warehouse. Raw data lands here before being promoted to final tables.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- TL;DR -->
+  <div class="tldr">
+    <div class="tldr-label">TL;DR — Key takeaways</div>
+    <ul>
+      <li>ETL and ELT are both data pipeline patterns — they share the same three operations but differ in order</li>
+      <li>In ETL, data is transformed on a separate server <em>before</em> loading. In ELT, raw data is loaded first and transformed inside the warehouse</li>
+      <li>ELT is faster, more flexible, and handles diverse data types — it's the standard for modern cloud analytics</li>
+      <li>ETL is still the right choice for legacy systems, compliance requirements, or resource-constrained targets</li>
+      <li>Neither is universally better — the right choice depends on your infrastructure, data types, and team needs</li>
+    </ul>
+  </div>
+
+  <!-- AUTHOR -->
+  <div class="author-bar">
+    <div class="author-avatar">F</div>
+    <div class="author-info">
+      <h5>Farheen Shaikh</h5>
+      <p>Data Engineering · AI/ML · Portfolio: <a href="https://farheen-shaikh-portfolio.vercel.app" style="color:var(--accent)">farheen-shaikh530.github.io/Portfolio</a></p>
+    </div>
+  </div>
+
+</article>
+
+<footer>
+  <span>© 2026 Farheen Shaikh</span>
+  <span><a href="https://farheen-shaikh530.github.io/Portfolio/#blog">← Back to Blog</a></span>
+</footer>
+
+</body>
+</html>

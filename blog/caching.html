@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Caching, Explained: From Cache-Aside to Cache Stampede</title>
+<style>
+  :root{
+    --bg:#0f1410;
+    --panel:#161d17;
+    --ink:#e9ede7;
+    --muted:#9bab9a;
+    --accent:#7ee08a;
+    --accent-dim:#3c5a3f;
+    --line:#2a342a;
+    --code-bg:#0b0f0c;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Iowan Old Style','Palatino Linotype',Georgia,serif;
+    line-height:1.65;
+  }
+  .wrap{max-width:760px;margin:0 auto;padding:0 24px 120px;}
+
+  header.hero{
+    padding:90px 24px 50px;
+    max-width:760px;
+    margin:0 auto;
+    border-bottom:1px solid var(--line);
+  }
+  .eyebrow{
+    font-family:'JetBrains Mono','SF Mono',Menlo,monospace;
+    font-size:12px;
+    letter-spacing:.18em;
+    text-transform:uppercase;
+    color:var(--accent);
+    margin-bottom:18px;
+  }
+  h1{
+    font-size:42px;
+    line-height:1.12;
+    margin:0 0 18px;
+    font-weight:600;
+    letter-spacing:-0.01em;
+  }
+  .dek{
+    color:var(--muted);
+    font-size:18px;
+    margin:0;
+    max-width:560px;
+  }
+
+  h2{
+    font-family:'JetBrains Mono','SF Mono',Menlo,monospace;
+    font-size:13px;
+    text-transform:uppercase;
+    letter-spacing:.14em;
+    color:var(--accent);
+    margin:64px 0 8px;
+    display:flex;
+    align-items:center;
+    gap:12px;
+  }
+  h2::before{
+    content:attr(data-n);
+    color:var(--accent-dim);
+    font-size:13px;
+  }
+  h2 + p, h2 + .diagram{margin-top:18px;}
+  h3{
+    font-size:19px;
+    margin:36px 0 10px;
+    font-weight:600;
+    color:var(--ink);
+  }
+  p{font-size:17px;color:#d6dcd3;}
+  p.lead{font-size:18px;}
+  strong{color:var(--ink);}
+  a{color:var(--accent);text-decoration:none;border-bottom:1px solid var(--accent-dim);}
+
+  .divider{height:1px;background:var(--line);margin:60px 0;border:0;}
+
+  /* Diagram blocks */
+  .diagram{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:28px 22px;
+    margin:22px 0 28px;
+    overflow-x:auto;
+  }
+  .diagram svg{display:block;margin:0 auto;min-width:520px;}
+  .diagram-caption{
+    font-family:'JetBrains Mono','SF Mono',Menlo,monospace;
+    font-size:12px;
+    color:var(--muted);
+    text-align:center;
+    margin-top:14px;
+    letter-spacing:.02em;
+  }
+
+  .node-box{fill:var(--code-bg);stroke:#4a5a48;stroke-width:1.5;}
+  .node-circle{fill:var(--code-bg);stroke:#4a5a48;stroke-width:1.5;}
+  .node-label{fill:#e9ede7;font-family:'JetBrains Mono',Menlo,monospace;font-size:13px;text-anchor:middle;}
+  .edge{stroke:#6b7a68;stroke-width:1.5;fill:none;marker-end:url(#arrow);}
+  .edge-accent{stroke:var(--accent);stroke-width:1.5;fill:none;marker-end:url(#arrowAccent);}
+  .edge-label{fill:var(--muted);font-family:'JetBrains Mono',Menlo,monospace;font-size:11px;text-anchor:middle;}
+  .step-tag{fill:var(--accent);font-family:'JetBrains Mono',Menlo,monospace;font-size:11px;font-weight:700;text-anchor:middle;}
+
+  /* Problem cards */
+  .problem-card{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-left:3px solid var(--accent);
+    border-radius:6px;
+    padding:18px 22px;
+    margin:18px 0;
+  }
+  .problem-card h4{
+    margin:0 0 8px;
+    font-size:16px;
+    color:var(--ink);
+    font-family:'JetBrains Mono',Menlo,monospace;
+    text-transform:none;
+  }
+  .problem-card p{margin:0;font-size:15.5px;color:var(--muted);}
+
+  /* Comparison table */
+  table{
+    width:100%;
+    border-collapse:collapse;
+    margin:24px 0;
+    font-size:15px;
+  }
+  th,td{
+    text-align:left;
+    padding:12px 14px;
+    border-bottom:1px solid var(--line);
+  }
+  th{
+    font-family:'JetBrains Mono',Menlo,monospace;
+    font-size:11px;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:var(--accent);
+    font-weight:500;
+  }
+  td{color:#d6dcd3;}
+  td:first-child{color:var(--ink);font-weight:600;white-space:nowrap;}
+
+  .pullquote{
+    font-size:21px;
+    color:var(--ink);
+    border-left:3px solid var(--accent);
+    padding-left:20px;
+    margin:36px 0;
+    font-style:italic;
+  }
+
+  footer{
+    text-align:center;
+    color:var(--muted);
+    font-size:13px;
+    font-family:'JetBrains Mono',Menlo,monospace;
+    padding:40px 0 0;
+  }
+
+  @media (max-width:600px){
+    header.hero{padding:60px 20px 36px;}
+    h1{font-size:32px;}
+    .diagram{padding:18px 12px;}
+    .diagram svg{min-width:480px;}
+  }
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#6b7a68"/>
+    </marker>
+    <marker id="arrowAccent" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#7ee08a"/>
+    </marker>
+  </defs>
+</svg>
+
+<header class="hero">
+  <div class="eyebrow">System Design Notes</div>
+  <h1>Caching, Explained: Why Your Database Needs Caching</h1>
+  <p class="dek">A field guide to cache types, placement strategies, write/read patterns, and the failure modes that catch every engineer at least once.</p>
+</header>
+
+<div class="wrap">
+
+  <p class="lead">Every cache exists to answer one question faster than the source of truth can: <strong>"have I seen this before?"</strong> The trick isn't adding a cache — that's one line of code. The trick is choosing <em>where</em> it lives, <em>when</em> it gets written, and <em>what happens</em> when it doesn't have the answer.</p>
+
+  <hr class="divider">
+
+  <h2 data-n="01">Types of Cache</h2>
+  <p>Before picking a pattern, decide where the cache physically lives. That choice alone determines its blast radius.</p>
+
+  <h3>External Cache</h3>
+  <p>A separate service — think Redis or Memcached — sitting between your app server and your database. The app checks the cache first; if it's empty, it falls back to the database.</p>
+
+  <div class="diagram">
+    <svg viewBox="0 0 620 220" width="100%" height="220">
+      <rect class="node-box" x="20" y="90" width="110" height="46" rx="6"/>
+      <text class="node-label" x="75" y="118">Client</text>
+
+      <rect class="node-box" x="250" y="90" width="120" height="46" rx="6"/>
+      <text class="node-label" x="310" y="113">Appln</text>
+      <text class="node-label" x="310" y="128">Server</text>
+
+      <ellipse class="node-circle" cx="540" cy="40" rx="55" ry="32"/>
+      <text class="node-label" x="540" y="45">Cache</text>
+
+      <ellipse class="node-circle" cx="540" cy="190" rx="55" ry="32"/>
+      <text class="node-label" x="540" y="195">DB</text>
+
+      <path class="edge" d="M130,113 L250,113"/>
+      <path class="edge" d="M250,118 L130,118" transform="translate(0,0)"/>
+
+      <path class="edge-accent" d="M370,100 L495,55"/>
+      <text class="step-tag" x="430" y="65">① cache check</text>
+
+      <path class="edge" d="M370,125 L495,175"/>
+      <text class="edge-label" x="455" y="160">② read from DB</text>
+      <text class="edge-label" x="455" y="172">as fallback</text>
+    </svg>
+    <div class="diagram-caption">Client ↔ App Server ↔ (Cache, then DB on miss)</div>
+  </div>
+
+  <h3>Client-Side Caching</h3>
+  <p>The cache moves all the way to the edge — into the client itself. Zero network hops on a hit, but you give up control: you can't centrally invalidate a thousand browsers or mobile devices at once.</p>
+
+  <div class="diagram">
+    <svg viewBox="0 0 620 140" width="100%" height="140">
+      <rect class="node-box" x="20" y="40" width="160" height="60" rx="6"/>
+      <text class="node-label" x="100" y="62">Client</text>
+      <rect class="node-box" x="35" y="72" width="90" height="22" rx="4" fill="#0d130e" stroke="#5d7a5a"/>
+      <text class="node-label" x="80" y="87" style="font-size:10px">cache</text>
+
+      <rect class="node-box" x="280" y="40" width="130" height="60" rx="6"/>
+      <text class="node-label" x="345" y="65">Application</text>
+      <text class="node-label" x="345" y="80">server</text>
+
+      <ellipse class="node-circle" cx="560" cy="70" rx="50" ry="30"/>
+      <text class="node-label" x="560" y="75">DB</text>
+
+      <path class="edge" d="M180,70 L280,70"/>
+      <path class="edge" d="M410,70 L510,70"/>
+    </svg>
+    <div class="diagram-caption">Cache lives inside the client — fastest hit, hardest to invalidate</div>
+  </div>
+
+  <h3>In-Process Cache</h3>
+  <p>The cache lives inside the application server's own memory (a local hashmap, for instance). Fast and simple — but in a multi-server deployment, each instance has its <em>own</em> copy, so consistency across servers isn't guaranteed.</p>
+
+  <div class="diagram">
+    <svg viewBox="0 0 620 140" width="100%" height="140">
+      <rect class="node-box" x="20" y="40" width="130" height="60" rx="6"/>
+      <text class="node-label" x="85" y="75">Client</text>
+
+      <rect class="node-box" x="280" y="40" width="130" height="60" rx="6"/>
+      <text class="node-label" x="345" y="62">App</text>
+      <text class="node-label" x="345" y="76">server</text>
+      <rect x="295" y="80" width="100" height="20" rx="4" fill="#0d130e" stroke="#5d7a5a"/>
+      <text class="node-label" x="345" y="94" style="font-size:10px">cache</text>
+
+      <ellipse class="node-circle" cx="560" cy="70" rx="50" ry="30"/>
+      <text class="node-label" x="560" y="75">DB</text>
+
+      <path class="edge" d="M150,70 L280,70"/>
+      <path class="edge" d="M410,70 L510,70"/>
+    </svg>
+    <div class="diagram-caption">Cache lives inside the app server's memory — fast, but not shared across instances</div>
+  </div>
+
+  <hr class="divider">
+
+  <h2 data-n="02">CDN: Caching at the Edge</h2>
+  <p>A Content Delivery Network is really just an external cache distributed geographically. Instead of one cache near your database, you have many caches — points of presence (PoPs) — scattered around the world. A client always talks to the <strong>nearest</strong> one.</p>
+
+  <div class="diagram">
+    <svg viewBox="0 0 620 260" width="100%" height="260">
+      <ellipse class="node-circle" cx="120" cy="60" rx="45" ry="28"/>
+      <text class="node-label" x="120" y="65">CDN</text>
+
+      <ellipse class="node-circle" cx="120" cy="200" rx="45" ry="28"/>
+      <text class="node-label" x="120" y="205">CDN</text>
+
+      <ellipse class="node-circle" cx="500" cy="200" rx="45" ry="28"/>
+      <text class="node-label" x="500" y="205">CDN</text>
+
+      <rect class="node-box" x="270" y="115" width="100" height="44" rx="6"/>
+      <text class="node-label" x="320" y="142">Server</text>
+
+      <rect class="node-box" x="555" y="160" width="55" height="34" rx="6"/>
+      <text class="node-label" x="582" y="181" style="font-size:11px">Client</text>
+
+      <path class="edge" d="M165,60 L270,125" stroke-dasharray="4,3"/>
+      <path class="edge" d="M165,200 L270,148" stroke-dasharray="4,3"/>
+      <path class="edge" d="M370,148 L500,180" stroke-dasharray="4,3"/>
+      <path class="edge-accent" d="M555,178 L545,195"/>
+    </svg>
+    <div class="diagram-caption">Client reads from its closest CDN node, not the origin server</div>
+  </div>
+
+  <p>This is why a video loads instantly for someone in Tokyo and someone in Toronto at the same time — both are hitting a local edge node, not a single origin server on the other side of the planet.</p>
+
+  <hr class="divider">
+
+  <h2 data-n="03">Cache Architecture: Read &amp; Write Patterns</h2>
+  <p>Where the cache <em>lives</em> is one decision. How it gets <em>populated</em> and <em>kept in sync</em> with the database is another — and this is where most of the interesting tradeoffs live.</p>
+
+  <h3>Cache-Aside (Lazy Loading)</h3>
+  <p>The most common pattern. The application — not the cache — is responsible for loading data. On a read, check the cache first. Miss? Read from the database, then write that value into the cache for next time.</p>
+
+  <div class="diagram">
+    <svg viewBox="0 0 620 220" width="100%" height="220">
+      <rect class="node-box" x="20" y="90" width="120" height="50" rx="6"/>
+      <text class="node-label" x="80" y="112">Appln</text>
+      <text class="node-label" x="80" y="127">Server</text>
+
+      <ellipse class="node-circle" cx="350" cy="50" rx="55" ry="32"/>
+      <text class="node-label" x="350" y="55">Cache</text>
+
+      <ellipse class="node-circle" cx="350" cy="190" rx="55" ry="32"/>
+      <text class="node-label" x="350" y="195">DB</text>
+
+      <path class="edge-accent" d="M140,100 L300,60"/>
+      <text class="step-tag" x="220" y="68">① check DB</text>
+
+      <path class="edge" d="M300,55 L140,115"/>
+
+      <path class="edge" d="M140,125 L300,180"/>
+      <text class="edge-label" x="225" y="170">② read from</text>
+      <text class="edge-label" x="225" y="182">DB as fallback</text>
+      <path class="edge" d="M300,185 L140,135"/>
+    </svg>
+    <div class="diagram-caption">App owns the logic: check cache → miss → read DB → populate cache</div>
+  </div>
+
+  <p><strong>Tradeoff:</strong> simple and resilient (a cache outage just means slower reads), but the first request for any key always pays the full database cost.</p>
+
+  <h3>Write-Through Cache</h3>
+  <p>Writes go to the cache first, and the cache synchronously forwards the write to the database before confirming completion. The cache and DB never drift apart, but every write now pays the latency of both systems.</p>
+
+  <div class="diagram">
+    <svg viewBox="0 0 620 130" width="100%" height="130">
+      <rect class="node-box" x="20" y="35" width="120" height="50" rx="6"/>
+      <text class="node-label" x="80" y="57">Appln</text>
+      <text class="node-label" x="80" y="72">Server</text>
+
+      <ellipse class="node-circle" cx="350" cy="60" rx="55" ry="32"/>
+      <text class="node-label" x="350" y="65">Cache</text>
+
+      <ellipse class="node-circle" cx="560" cy="60" rx="50" ry="32"/>
+      <text class="node-label" x="560" y="65">DB</text>
+
+      <path class="edge" d="M140,60 L295,60"/>
+      <text class="edge-label" x="220" y="45">write to cache</text>
+
+      <path class="edge" d="M405,60 L510,60"/>
+      <text class="edge-label" x="455" y="45">sync with DB</text>
+      <text class="edge-label" x="455" y="80">for write</text>
+    </svg>
+    <div class="diagram-caption">Write completes only once the DB write is synced — strong consistency, higher write latency</div>
+  </div>
+
+  <h3>Write-Behind Cache (Write-Back)</h3>
+  <p>The cache acknowledges the write immediately and flushes to the database asynchronously, in the background. Writes feel instant, but there's a window where data exists only in the cache — a crash there means data loss.</p>
+
+  <div class="diagram">
+    <svg viewBox="0 0 620 150" width="100%" height="150">
+      <rect class="node-box" x="20" y="50" width="120" height="50" rx="6"/>
+      <text class="node-label" x="80" y="72">Appln</text>
+      <text class="node-label" x="80" y="87">Server</text>
+
+      <ellipse class="node-circle" cx="350" cy="60" rx="55" ry="32"/>
+      <text class="node-label" x="350" y="65">Cache</text>
+
+      <ellipse class="node-circle" cx="560" cy="60" rx="50" ry="32"/>
+      <text class="node-label" x="560" y="65">DB</text>
+
+      <path class="edge" d="M140,70 L295,70"/>
+      <path class="edge" d="M295,50 L140,50"/>
+      <text class="edge-label" x="220" y="35">read</text>
+
+      <path class="edge" d="M405,55 L510,55"/>
+      <text class="edge-label" x="455" y="40">sync flush</text>
+      <text class="edge-label" x="455" y="75">to DB</text>
+    </svg>
+    <div class="diagram-caption">Write returns instantly; the DB sync happens later, off the critical path</div>
+  </div>
+
+  <h3>Read-Through Caching</h3>
+  <p>Similar to cache-aside, but the cache itself owns the fallback logic — the application only ever talks to the cache, and the cache transparently loads from the database on a miss.</p>
+
+  <div class="diagram">
+    <svg viewBox="0 0 620 200" width="100%" height="200">
+      <rect class="node-box" x="20" y="80" width="120" height="50" rx="6"/>
+      <text class="node-label" x="80" y="102">Appln</text>
+      <text class="node-label" x="80" y="117">Server</text>
+
+      <ellipse class="node-circle" cx="350" cy="60" rx="55" ry="32"/>
+      <text class="node-label" x="350" y="65">Cache</text>
+
+      <ellipse class="node-circle" cx="560" cy="160" rx="50" ry="32"/>
+      <text class="node-label" x="560" y="165">DB</text>
+
+      <path class="edge-accent" d="M140,95 L300,68"/>
+      <text class="step-tag" x="215" y="65">① check cache</text>
+
+      <path class="edge" d="M405,75 L520,140"/>
+      <text class="edge-label" x="480" y="105">② read from</text>
+      <text class="edge-label" x="480" y="118">DB</text>
+    </svg>
+    <div class="diagram-caption">App only ever talks to the cache; the cache fetches from the DB itself on a miss</div>
+  </div>
+
+  <hr class="divider">
+
+  <h2 data-n="04">Comparing the Patterns</h2>
+  <table>
+    <thead>
+      <tr><th>Pattern</th><th>Best for</th><th>Risk</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Cache-Aside</td><td>Read-heavy, simple workloads</td><td>Cold cache penalty on first read</td></tr>
+      <tr><td>Write-Through</td><td>Strong cache/DB consistency</td><td>Higher write latency</td></tr>
+      <tr><td>Write-Behind</td><td>Write-heavy, latency-sensitive apps</td><td>Possible data loss on crash</td></tr>
+      <tr><td>Read-Through</td><td>Centralizing fallback logic</td><td>Tighter coupling to the cache layer</td></tr>
+    </tbody>
+  </table>
+
+  <hr class="divider">
+
+  <h2 data-n="05">Common Problems With Cache</h2>
+  <p class="lead">A cache that never fails is a cache you haven't load-tested yet. Here's the failure mode every system eventually meets:</p>
+
+  <div class="problem-card">
+    <h4>Cache Stampede (Thundering Herd)</h4>
+    <p>When a popular cache key expires — or the cache itself goes down — every concurrent request that needed that key gets a miss at the same instant. Instead of one request hitting the database, <em>all</em> of them do, simultaneously.</p>
+  </div>
+
+  <div class="diagram">
+    <svg viewBox="0 0 620 260" width="100%" height="260">
+      <rect class="node-box" x="20" y="20" width="100" height="36" rx="6"/>
+      <text class="node-label" x="70" y="42" style="font-size:12px">Client</text>
+      <rect class="node-box" x="20" y="65" width="100" height="36" rx="6"/>
+      <text class="node-label" x="70" y="87" style="font-size:12px">Client</text>
+      <rect class="node-box" x="20" y="110" width="100" height="36" rx="6"/>
+      <text class="node-label" x="70" y="132" style="font-size:12px">Client</text>
+      <text class="node-label" x="70" y="160" style="font-size:16px">⋮</text>
+      <rect class="node-box" x="20" y="175" width="100" height="36" rx="6"/>
+      <text class="node-label" x="70" y="197" style="font-size:12px">Client</text>
+
+      <rect class="node-box" x="270" y="95" width="120" height="50" rx="6"/>
+      <text class="node-label" x="330" y="117">Appln</text>
+      <text class="node-label" x="330" y="132">Server</text>
+
+      <ellipse class="node-circle" cx="540" cy="40" rx="50" ry="28"/>
+      <text class="node-label" x="540" y="45">Cache</text>
+      <text class="edge-label" x="490" y="20">miss</text>
+
+      <ellipse class="node-circle" cx="540" cy="200" rx="50" ry="32"/>
+      <text class="node-label" x="540" y="200">DB</text>
+      <text class="edge-label" x="595" y="225" style="fill:#e07e7e">overwhelmed</text>
+
+      <path class="edge" d="M120,38 L270,110"/>
+      <path class="edge" d="M120,83 L270,118"/>
+      <path class="edge" d="M120,128 L270,128"/>
+      <path class="edge" d="M120,193 L270,135"/>
+
+      <path class="edge" d="M390,108 L495,55"/>
+
+      <path class="edge-accent" d="M395,118 L500,180"/>
+      <path class="edge-accent" d="M395,128 L500,190"/>
+      <path class="edge-accent" d="M395,138 L500,200"/>
+    </svg>
+    <div class="diagram-caption">One cache miss, many clients → every request floods straight to the database</div>
+  </div>
+
+  <p>This is why production caching systems add jitter to expiry times, use locks or "request coalescing" so only one request rebuilds a hot key, or keep serving slightly stale data while a single background job refreshes it.</p>
+
+  <hr class="divider">
+
+  <p class="pullquote">A cache doesn't remove the database — it changes how often you have to ask it the same question.</p>
+
+  <p>Pick your placement (external, CDN, in-process, client-side) based on <em>who</em> needs the speed. Pick your write pattern (aside, through, behind) based on how much consistency you're willing to trade for latency. And always plan for the day your cache empties out all at once — because it will.</p>
+
+</div>
+
+<footer>
+  Notes on caching · written for engineers who've been paged by a cold cache at 3am
+</footer>
+
+</body>
+</html>
